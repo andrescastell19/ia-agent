@@ -1,0 +1,38 @@
+# Dependencias
+node_modules/
+jspm_packages/
+web_modules/
+proyectos/
+output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Variables de entorno
+.env
+.env.local
+
+# Cobertura de pruebas y bases de datos
+coverage/
+.nyc_output/
+
+# Archivos compilados o de compilación
+build/
+dist/
+out/
+*.tsbuildinfo
+
+# Carpetas de caché y temporales
+.cache/
+.npm/
+.eslintcache
+.node_repl_history
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db

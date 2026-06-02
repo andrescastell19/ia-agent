@@ -1,0 +1,29 @@
+{
+  "name": "agente-analista",
+  "version": "1.0.0",
+  "description": "Agente analista inteligente de requerimientos y definición de stacks",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^20.19.41",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.9.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@langchain/community": "^1.1.29",
+    "@langchain/core": "^1.1.48",
+    "@langchain/ollama": "^1.2.7",
+    "inquirer": "^14.0.1",
+    "langchain": "^1.4.2"
+  }
+}
