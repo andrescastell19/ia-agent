@@ -56,10 +56,14 @@ export function materializeBackend(
   fs.mkdirSync(backendDir, { recursive: true });
   carpetasCreadas++;
 
-  // Crear estructura de carpetas
+// Crear estructura de carpetas
   for (const item of backend.estructura) {
     const fullPath = path.join(backendDir, item.ruta);
-    if (item.tipo === "carpeta") {
+
+    // FIX: ignorar rutas con extensión aunque vengan marcadas como carpeta
+    const tieneExtension = path.extname(item.ruta) !== "";
+
+    if (!tieneExtension && item.tipo === "carpeta") {
       fs.mkdirSync(fullPath, { recursive: true });
       carpetasCreadas++;
     }
@@ -70,6 +74,13 @@ export function materializeBackend(
     const fullPath = path.join(backendDir, codigo.archivo);
     const dir = path.dirname(fullPath);
     fs.mkdirSync(dir, { recursive: true });
+
+    // FIX: verificar que el destino no sea una carpeta existente
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
+      console.warn(`   ⚠️  Saltando "${codigo.archivo}" — existe como carpeta`);
+      continue;
+    }
+
     fs.writeFileSync(fullPath, codigo.contenido, "utf-8");
     archivosCreados++;
   }
