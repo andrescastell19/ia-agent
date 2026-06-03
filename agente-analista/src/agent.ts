@@ -2,6 +2,7 @@ import { Ollama } from "@langchain/ollama";
 import inquirer from "inquirer";
 import { validateRequirement } from "./phases/validateRequirement";
 import { detectProfile } from "./phases/detectProfile";
+import { validateBusinessSense } from "./phases/validateBusinessSense";
 import { analyzeRequirement } from "./phases/analyzeRequirement";
 import { proposeStack } from "./phases/proposeStack";
 import { proposeArchitecture } from "./phases/proposeArchitecture";
@@ -181,6 +182,49 @@ export async function runAgent(): Promise<void> {
     }
   }
 
+  // FASE 3: Validar sentido de negocio
+  console.log("⏳ Validando coherencia del requerimiento...\n");
+  const businessValidation = await validateBusinessSense(llm, requerimiento);
+
+  if (!businessValidation.valido) {
+    const iconos = {
+      contradiccion: "⚠️  Contradicción detectada",
+      alcance_irreal: "⚠️  Alcance demasiado amplio",
+      incoherencia: "⚠️  Incoherencia detectada",
+    };
+
+    console.log(`${iconos[businessValidation.tipo]}:`);
+    console.log(`   ${businessValidation.mensaje}\n`);
+    console.log(`💡 Sugerencia: ${businessValidation.sugerencia}\n`);
+
+    const { decision } = await inquirer.prompt([
+      {
+        type: "select",
+        name: "decision",
+        message: "¿Cómo quieres proceder?",
+        choices: [
+          { value: "reformular", name: "Reformular el requerimiento" },
+          { value: "cancelar", name: "Cancelar y salir" },
+        ],
+      },
+    ]);
+
+    if (decision === "cancelar") {
+      console.log("\n❌ Operación cancelada. Vuelve cuando tengas el requerimiento listo.\n");
+      return;
+    }
+
+    // Reformular
+    const { nuevoRequerimiento } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "nuevoRequerimiento",
+        message: "Describe tu proyecto de nuevo:",
+      },
+    ]);
+    requerimiento = nuevoRequerimiento;
+  }
+
   // FASE 3: Detectar perfil
   const perfil = await detectProfile(llm, requerimiento);
   console.log(`👤 Perfil detectado: ${perfil}\n`);
@@ -321,43 +365,53 @@ export async function runAgent(): Promise<void> {
       }
     }
   } else {
-    let conforme = false;
+    // Usuario no técnico — mostrar stack propuesto y dar opción de aceptar o elegir
+    const { ok } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "ok",
+        message: "¿Quieres continuar con estas tecnologías para tu proyecto?",
+        default: true,
+      },
+    ]);
 
-    while (!conforme) {
-      const { ok } = await inquirer.prompt([
+    if (!ok) {
+      console.log("\n📋 Sin problema, elige las tecnologías que prefieras:\n");
+
+      const ajuste = await inquirer.prompt([
         {
-          type: "confirm",
-          name: "ok",
-          message: "¿Quieres continuar con estas tecnologías para tu proyecto?",
-          default: true,
+          type: "select",
+          name: "frontend",
+          message: "¿Con qué tecnología quieres construir la interfaz visual?",
+          choices: [
+            { value: "angular", name: "Angular — robusto y estructurado, ideal para apps empresariales" },
+            { value: "react", name: "React — flexible y popular, ideal para apps dinámicas" },
+            { value: "vue", name: "Vue — sencillo y ligero, ideal para empezar rápido" },
+          ],
+        },
+        {
+          type: "select",
+          name: "backend",
+          message: "¿Con qué tecnología quieres construir el servidor?",
+          choices: [
+            { value: "nodejs", name: "Node.js — rápido y JavaScript, fácil de aprender" },
+            { value: "python", name: "Python — muy legible, ideal para lógica compleja" },
+            { value: "dotnet", name: ".NET — sólido y empresarial, ideal para sistemas grandes" },
+            { value: "java", name: "Java — robusto y maduro, ideal para grandes organizaciones" },
+          ],
         },
       ]);
 
-      if (ok) {
-        conforme = true;
-      } else {
-        const { inquietud } = await inquirer.prompt([
-          {
-            type: "input",
-            name: "inquietud",
-            message: "¿Qué duda tienes o qué te gustaría entender mejor?",
-          },
-        ]);
+      stackFinal = {
+        frontend: ajuste.frontend,
+        backend: ajuste.backend,
+        base_de_datos: "sqlite",
+      };
 
-        console.log("\n⏳ Consultando...\n");
-
-        const respuesta = await llm.invoke([
-          {
-            role: "system",
-            content: `Eres un consultor amigable de software. El usuario no es técnico.
-Stack propuesto: Angular (frontend), Node.js (backend), SQLite (base de datos).
-Responde la duda en máximo 3 oraciones simples, sin tecnicismos.`,
-          },
-          { role: "user", content: inquietud },
-        ]);
-
-        console.log(`\n💬 ${respuesta}\n`);
-      }
+      console.log("\n🛠️  Stack seleccionado:");
+      console.log(`   Frontend:      ${stackFinal.frontend}`);
+      console.log(`   Backend:       ${stackFinal.backend}`);
+      console.log(`   Base de datos: ${stackFinal.base_de_datos}\n`);
     }
   }
 
