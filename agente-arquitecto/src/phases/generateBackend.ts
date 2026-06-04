@@ -42,18 +42,36 @@ Responde ÚNICAMENTE con un JSON sin texto adicional con este formato:
   ]
 }
 
-Reglas:
-- Genera código base real y funcional.
-- Para nodejs: usa Express, better-sqlite3, y TypeScript.
-- Para python: usa FastAPI o Django REST Framework con SQLite.
-- Para dotnet: usa ASP.NET Core minimal API.
-- Para java: usa Spring Boot.
-- Si la arquitectura es hexagonal: separa domain, application, infrastructure.
-- Si es microservicios: crea una carpeta por servicio.
-- Si es MVC: separa models, controllers, routes.
-- Incluye: modelo/entidad, repositorio, caso de uso o servicio, controlador y rutas por cada módulo.
-- Incluye configuración de base de datos SQLite.
-- Los campos de las entidades deben estar en el código generado.
+REGLAS GENERALES:
+- Genera código base real, completo y compilable sin errores.
+- Todos los archivos deben incluir los imports y usings necesarios.
+- El código debe ser coherente entre archivos (nombres de clases, namespaces, tipos).
+
+REGLAS PARA .NET / C#:
+- Usa SIEMPRE el namespace del proyecto en cada archivo: "namespace ${base.proyecto}"
+- Incluye SIEMPRE los usings necesarios en cada archivo:
+  * Modelos: sin usings adicionales
+  * Repositorios: using Microsoft.EntityFrameworkCore; using ${base.proyecto}.Models; using ${base.proyecto}.Data;
+  * Servicios: using ${base.proyecto}.Models; using ${base.proyecto}.Repositories;
+  * Controladores: using Microsoft.AspNetCore.Mvc; using ${base.proyecto}.Services; using ${base.proyecto}.Models;
+- Los repositorios deben inyectar AppDbContext, NO DbContext genérico.
+- AppDbContext se encuentra en el namespace ${base.proyecto}.Data
+- Cada clase debe tener su namespace declarado explícitamente.
+- NO uses top-level statements en clases que no sean Program.cs.
+- Los controladores deben heredar de ControllerBase y tener [ApiController] y [Route].
+
+REGLAS PARA Node.js:
+- Usa Express con TypeScript.
+- Incluye imports de módulos en cada archivo.
+- Usa better-sqlite3 para la base de datos.
+
+REGLAS PARA Python:
+- Usa FastAPI con imports explícitos en cada archivo.
+- Incluye from __future__ import annotations donde sea necesario.
+
+REGLAS PARA Java:
+- Incluye los imports de Spring Boot en cada archivo.
+- Usa anotaciones @RestController, @Service, @Repository.
 `;
 }
 
