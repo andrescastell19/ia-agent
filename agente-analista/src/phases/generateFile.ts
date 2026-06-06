@@ -7,6 +7,11 @@ export function generateFile(data: ProjectData): string {
   const fileName = `fichero_base_${Date.now()}.json`;
   const filePath = path.join(outputDir, fileName);
 
+  // Ensure output directory exists
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
   return filePath;
 }
