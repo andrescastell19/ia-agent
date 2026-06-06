@@ -2,11 +2,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { PromptLoader } from "./utils/promptLoader.js";
 
-const PROMPTS_PATH = path.resolve(
+const PROMPTS_DIR = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
-	"../prompts/prompts.json"
+	"../prompts"
 );
-const promptLoader = new PromptLoader(PROMPTS_PATH);
+const promptLoader = new PromptLoader(PROMPTS_DIR);
 
 export const DETECT_PROFILE_PROMPT = promptLoader.get("DETECT_PROFILE_PROMPT");
 export const ANALYZE_REQUIREMENT_PROMPT = promptLoader.get("ANALYZE_REQUIREMENT_PROMPT");

@@ -1,60 +1,40 @@
-/// <reference types="node" />
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
-export type PromptConfigValue = string | { file: string };
-export type PromptConfig = Record<string, PromptConfigValue>;
-export type PromptMap = Record<string, string>;
+type PromptMap = Record<string, string>;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class PromptLoader {
-  private readonly prompts: PromptMap;
+  private baseDir: string;
+  private prompts: PromptMap = {};
 
-  constructor(private readonly configFilePath: string) {
-    const resolvedPath = path.resolve(configFilePath);
-    if (!fs.existsSync(resolvedPath)) {
-      throw new Error(`Prompt configuration file not found: ${resolvedPath}`);
-    }
-
-    this.prompts = this.loadPrompts(resolvedPath);
+  constructor(baseDir?: string) {
+    this.baseDir = baseDir || path.join(__dirname, "..", "..", "prompts");
+    this.loadAll();
   }
 
-  private loadPrompts(configPath: string): PromptMap {
-    const raw = fs.readFileSync(configPath, "utf-8");
-    const promptConfig = JSON.parse(raw) as PromptConfig;
-    const baseDir = path.dirname(configPath);
-
-    return Object.entries(promptConfig).reduce<PromptMap>((acc, [key, value]) => {
-      acc[key] = this.resolvePromptValue(value, baseDir);
-      return acc;
-    }, {});
+  private resolvePath(key: string) {
+    return path.join(this.baseDir, key + ".md");
   }
 
-  private resolvePromptValue(value: PromptConfigValue, baseDir: string): string {
-    if (typeof value === "string") {
-      const maybePath = path.resolve(baseDir, value);
-      if (fs.existsSync(maybePath) && fs.statSync(maybePath).isFile()) {
-        return fs.readFileSync(maybePath, "utf-8");
-      }
-      return value;
+  private loadAll() {
+    if (!fs.existsSync(this.baseDir)) return;
+    const stat = fs.statSync(this.baseDir);
+    if (!stat.isDirectory()) return;
+    const files = fs.readdirSync(this.baseDir).filter(f => f.endsWith('.md'));
+    for (const f of files) {
+      const key = f.replace(/\.md$/, "");
+      this.prompts[key] = fs.readFileSync(path.join(this.baseDir, f), "utf-8");
     }
-
-    if (value && typeof value.file === "string") {
-      const promptPath = path.resolve(baseDir, value.file);
-      if (!fs.existsSync(promptPath)) {
-        throw new Error(`Prompt file not found: ${promptPath}`);
-      }
-      return fs.readFileSync(promptPath, "utf-8");
-    }
-
-    throw new Error("Prompt value must be a string or an object with a file property.");
   }
 
   public get(key: string): string {
-    const prompt = this.prompts[key];
-    if (!prompt) {
-      throw new Error(`Prompt key not found in configuration: ${key}`);
-    }
-    return prompt;
+    const p = this.prompts[key];
+    if (!p) throw new Error(`Prompt key not found: ${key}`);
+    return p;
   }
 
   public getAll(): PromptMap {
@@ -62,6 +42,6 @@ export class PromptLoader {
   }
 }
 
-export function loadPrompts(configFilePath: string): PromptMap {
-  return new PromptLoader(configFilePath).getAll();
+export function loadPrompts(baseDir?: string): PromptMap {
+  return new PromptLoader(baseDir).getAll();
 }
