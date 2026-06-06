@@ -1,4 +1,4 @@
-# ia-agent
+# IA Agent
 
 Sistema multi-agente de IA para la generación automatizada de proyectos de software a partir de requerimientos en lenguaje natural.
 
@@ -8,7 +8,7 @@ Sistema multi-agente de IA para la generación automatizada de proyectos de soft
 
 El usuario describe lo que quiere construir. El sistema analiza el requerimiento, diseña la arquitectura y genera la estructura completa del proyecto lista para desarrollar.
 
-```
+```text
 Usuario: "Quiero un sistema de inventario con control de stock y reportes"
     │
     ▼
@@ -33,9 +33,11 @@ Usuario: "Quiero un sistema de inventario con control de stock y reportes"
 ## Agentes
 
 ### Agente Analista
+
 Interactúa con el usuario vía CLI para recopilar y procesar el requerimiento.
 
 **Fases internas:**
+
 1. `detect-intent` — identifica si es un proyecto nuevo o modificación de uno existente
 2. `validate-requirement` — verifica que el requerimiento tiene suficiente información funcional; si no, hace preguntas
 3. `detect-profile` — clasifica al usuario como técnico o no técnico para adaptar el lenguaje
@@ -50,9 +52,11 @@ Interactúa con el usuario vía CLI para recopilar y procesar el requerimiento.
 ---
 
 ### Agente Arquitecto
+
 Lee el output del Analista y genera los planos de cada capa del sistema.
 
 **Fases internas:**
+
 1. `generate-frontend` — estructura de archivos, dependencias y código base del frontend
 2. `generate-backend` — estructura, dependencias y código base del backend según la arquitectura elegida
 3. `generate-infra` — Dockerfiles, docker-compose y pipeline de CI/CD
@@ -66,9 +70,11 @@ Frontend y backend se generan en paralelo. La infra espera a que ambos terminen.
 ---
 
 ### Agente Materializador
+
 Lee los JSONs del Arquitecto y los convierte en archivos reales en disco.
 
 **Pasos:**
+
 1. Lee `maestro.json`, `frontend.json`, `backend.json`, `infra.json`
 2. Crea la carpeta del proyecto
 3. Escribe la estructura de directorios y archivos de cada capa
@@ -81,14 +87,14 @@ Lee los JSONs del Arquitecto y los convierte en archivos reales en disco.
 
 ## Tecnologías
 
-| Componente | Tecnología |
-|---|---|
-| Lenguaje | TypeScript 5 |
-| Runtime LLM | Ollama (local) |
-| Framework LLM | LangChain (`@langchain/ollama`) |
-| CLI interactiva | Inquirer.js |
-| Modelo — Analista | `qwen2.5:14b` |
-| Modelo — Arquitecto | `deepseek-coder-v2` |
+| Componente          | Tecnología                      |
+| ------------------- | ------------------------------- |
+| Lenguaje            | TypeScript 5                    |
+| Runtime LLM         | Ollama (local)                  |
+| Framework LLM       | LangChain (`@langchain/ollama`) |
+| CLI interactiva     | Inquirer.js                     |
+| Modelo — Analista   | `qwen2.5:14b`                   |
+| Modelo — Arquitecto | `deepseek-coder-v2`             |
 
 ---
 
@@ -111,8 +117,11 @@ Cada agente es un paquete independiente. Instala las dependencias en cada uno:
 
 ```bash
 cd agente-analista && npm install
+cd ..
 cd ../agente-arquitecto && npm install
+cd ..
 cd ../agente-materializador && npm install
+cd ..
 ```
 
 ---
@@ -126,6 +135,7 @@ Los agentes se ejecutan en secuencia. Cada uno consume el output del anterior.
 ```bash
 cd agente-analista
 npm start
+cd ..
 ```
 
 El agente te hace preguntas en la terminal para entender tu proyecto. Al finalizar genera un JSON en `agente-analista/output/`.
@@ -135,6 +145,7 @@ El agente te hace preguntas en la terminal para entender tu proyecto. Al finaliz
 ```bash
 cd agente-arquitecto
 npm start
+cd ..
 ```
 
 Lee el JSON más reciente del Analista y genera los planos de arquitectura en `agente-arquitecto/output/`.
@@ -144,6 +155,7 @@ Lee el JSON más reciente del Analista y genera los planos de arquitectura en `a
 ```bash
 cd agente-materializador
 npm start
+cd ..
 ```
 
 Lee los planos del Arquitecto y escribe el proyecto en `agente-materializador/proyectos/`.
@@ -152,14 +164,14 @@ Lee los planos del Arquitecto y escribe el proyecto en `agente-materializador/pr
 
 ## Stacks soportados
 
-| Capa | Opciones |
-|---|---|
-| Frontend | Angular, React, Vue |
-| Backend | Node.js, Python, .NET, Java |
-| Base de datos | SQLite |
-| Arquitectura | Monolito, Microservicios, Hexagonal, MVC, Event-Driven |
+| Capa            | Opciones                                                      |
+| --------------- | ------------------------------------------------------------- |
+| Frontend        | Angular, React, Vue                                           |
+| Backend         | Node.js, Python, .NET, Java                                   |
+| Base de datos   | SQLite                                                        |
+| Arquitectura    | Monolito, Microservicios, Hexagonal, MVC, Event-Driven        |
 | Infraestructura | Docker, docker-compose, Kubernetes, GitHub Actions, GitLab CI |
-| Patrones | Repository, CQRS, Factory, Singleton, Observer |
+| Patrones        | Repository, CQRS, Factory, Singleton, Observer                |
 
 ---
 
@@ -167,7 +179,7 @@ Lee los planos del Arquitecto y escribe el proyecto en `agente-materializador/pr
 
 El Agente Analista detecta automáticamente si describes una modificación a un proyecto ya generado:
 
-```
+```text
 "Al proyecto Inventario agrégale un módulo de reportes con exportación a PDF"
 ```
 
@@ -177,7 +189,7 @@ El agente carga el `fichero_base.json` existente, aplica los cambios y genera un
 
 ## Estructura del repositorio
 
-```
+```text
 ia-agent/
 ├── agente-analista/
 │   ├── src/
